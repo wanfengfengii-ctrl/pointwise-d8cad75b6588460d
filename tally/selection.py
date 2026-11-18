@@ -15,9 +15,14 @@ class CurrentEpisode:
 
 def select_current_episodes(view, shift):
     try:
+        ended = set()
         for facts in view:
-            ended = {outgoing.grant.identity.episode for outgoing in facts.outgoing
-                     if outgoing.recorded_receipt is not None or outgoing.retired}
+            for outgoing in facts.outgoing:
+                if outgoing.recorded_receipt is not None or outgoing.retired:
+                    ended.add(outgoing.grant.identity.episode)
+            for decision in facts.incoming:
+                ended.add(decision.grant.identity.episode)
+        for facts in view:
             received = [(decision, evidence) for decision, evidence in admitted_episodes(facts.inbox, facts.incoming)
                         if evidence.observation.origin.shift == shift]
             received_records = {evidence.observation.record_id for _, evidence in received}
@@ -28,6 +33,8 @@ def select_current_episodes(view, shift):
                     raise CustodyUnavailable('current origin payload is unavailable')
                 yield CurrentEpisode(facts.station, origin.episode, origin.observation)
             for decision, evidence in received:
+                if decision.episode in ended:
+                    continue
                 if not evidence.active_link:
                     raise CustodyUnavailable('current received payload is unavailable')
                 yield CurrentEpisode(facts.station, decision.episode, evidence.observation)

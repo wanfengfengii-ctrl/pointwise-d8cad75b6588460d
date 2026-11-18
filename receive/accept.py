@@ -2,7 +2,6 @@ from capture.observation import Observation
 from capture.validation import ObservationRejected, validate_record_input
 from dispatch.custody import outgoing_status
 from dispatch.request_ids import TransferRejected
-from receive.custody import admit_received
 from receive.evidence import store_evidence
 from station_store import atomic
 
@@ -30,6 +29,4 @@ def accept_original(archives, grant, observation):
     if source is None or source.grant != grant:
         raise TransferRejected('envelope has no matching durable source grant')
     with archives.open(identity.destination) as db, atomic(db):
-        evidence = store_evidence(db, grant, observation)
-        admit_received(db, evidence)
-        return evidence
+        return store_evidence(db, grant, observation)

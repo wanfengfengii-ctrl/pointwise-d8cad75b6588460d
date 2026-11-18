@@ -44,7 +44,16 @@ def resume_request(archives, grant, *, checkpoint=None):
         fact = outgoing_status(db, identity.episode)
         if fact is None or fact.grant != grant:
             raise TransferRejected('source grant is unavailable')
-        observation = load_source_payload(db, identity)
+        recorded_receipt = fact.recorded_receipt
+        observation = None if recorded_receipt is not None else load_source_payload(db, identity)
+    if recorded_receipt is not None:
+        try:
+            receipt = take_receipt(archives, identity.destination, recorded_receipt)
+        except ReceiptNotFound as error:
+            raise TransferRejected('the recorded result is unavailable at the destination') from error
+        if receipt.identity != identity or receipt.observation.digest() != grant.payload_digest:
+            raise TransferRejected('the recorded result does not match the source grant')
+        return receipt
     if observation is None:
         raise TransferInterrupted('source original is unavailable for delivery')
     accept_original(archives, grant, observation)

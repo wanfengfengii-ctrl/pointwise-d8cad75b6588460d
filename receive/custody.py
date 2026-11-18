@@ -60,10 +60,11 @@ def admit_received(db, evidence):
 def settle_incoming(archives, grant, *, before_commit=None):
     identity = grant.identity
     with archives.open(identity.destination) as db, atomic(db):
-        admission = lookup_incoming_decision(db, identity.number)
-        if admission is None or admission.grant != grant:
+        evidence = load_evidence(db, identity.number)
+        if evidence is None or evidence.grant != grant:
             raise TransferRejected('no admitted original matches this grant')
-        receipt = read_receipt(db, admission.receipt_id)
+        admit_received(db, evidence)
+        receipt = read_receipt(db, identity.receipt_id)
         if before_commit is not None:
             before_commit()
         return receipt
