@@ -1,0 +1,8 @@
+{
+  "slot": 1,
+  "first_request": "outward",
+  "return_request": "return",
+  "source": "east",
+  "destination": "west",
+  "interrupt_at": "before_reply"
+}

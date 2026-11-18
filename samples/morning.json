@@ -1,0 +1,11 @@
+{
+  "shift": "morning",
+  "station": "east",
+  "recording": "m",
+  "instrument": "meter-a",
+  "revision": "half",
+  "numerator": 1,
+  "denominator": 2,
+  "observations": [[1, 34], [2, 0], [3, null]],
+  "sheet_id": "morning-before-transfer"
+}
